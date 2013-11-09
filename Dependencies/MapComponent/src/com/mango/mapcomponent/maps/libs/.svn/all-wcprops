@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 131
+/mangotechno/svn/androidapps/!svn/ver/461/DestinationManager3/src/SC/Dependencies/MapComponent/src/com/mango/mapcomponent/maps/libs
+END
+FixedMyLocationOverlay.java
+K 25
+svn:wc:ra_dav:version-url
+V 159
+/mangotechno/svn/androidapps/!svn/ver/461/DestinationManager3/src/SC/Dependencies/MapComponent/src/com/mango/mapcomponent/maps/libs/FixedMyLocationOverlay.java
+END
+BalloonItemizedOverlay.java
+K 25
+svn:wc:ra_dav:version-url
+V 159
+/mangotechno/svn/androidapps/!svn/ver/461/DestinationManager3/src/SC/Dependencies/MapComponent/src/com/mango/mapcomponent/maps/libs/BalloonItemizedOverlay.java
+END
+BalloonOverlayView.java
+K 25
+svn:wc:ra_dav:version-url
+V 155
+/mangotechno/svn/androidapps/!svn/ver/461/DestinationManager3/src/SC/Dependencies/MapComponent/src/com/mango/mapcomponent/maps/libs/BalloonOverlayView.java
+END
+TapControlledMapView.java
+K 25
+svn:wc:ra_dav:version-url
+V 157
+/mangotechno/svn/androidapps/!svn/ver/461/DestinationManager3/src/SC/Dependencies/MapComponent/src/com/mango/mapcomponent/maps/libs/TapControlledMapView.java
+END
+OnSingleTapListener.java
+K 25
+svn:wc:ra_dav:version-url
+V 156
+/mangotechno/svn/androidapps/!svn/ver/461/DestinationManager3/src/SC/Dependencies/MapComponent/src/com/mango/mapcomponent/maps/libs/OnSingleTapListener.java
+END

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+   
+ <com.mango.mapcomponent.ui.CustomTapControlledMapView
+        android:id="@+id/mapview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:apiKey="0YUc6v02iE-3bXeIi6JJmLG8nyIW-54igezk_8w"
+        android:clickable="true"/>
+</LinearLayout>
