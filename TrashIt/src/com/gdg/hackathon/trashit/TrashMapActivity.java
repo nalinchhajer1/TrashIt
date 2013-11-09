@@ -16,20 +16,35 @@ package com.gdg.hackathon.trashit;
 
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
 import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
+import com.actionbarsherlock.view.Menu;
+import com.actionbarsherlock.view.MenuItem;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response.ErrorListener;
+import com.android.volley.Response.Listener;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
+import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMyLocationChangeListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -39,6 +54,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class TrashMapActivity extends AbstractMapActivity implements
     OnNavigationListener, OnInfoWindowClickListener {
+	
+	private String TAG = TrashMapActivity.class.getSimpleName();
+	
   private static final String STATE_NAV="nav";
   private static final int[] MAP_TYPE_NAMES= { R.string.normal,
       R.string.hybrid, R.string.satellite, R.string.terrain };
@@ -83,12 +101,20 @@ public class TrashMapActivity extends AbstractMapActivity implements
 		}
 	});
       
+      map.setOnMapClickListener(new OnMapClickListener() {
+		
+		@Override
+		public void onMapClick(LatLng arg0) {
+			// TODO Auto-generated method stub
+			Log.e(TAG , ""+arg0.latitude +" "+arg0.longitude );
+		}
+	});
+      
       map.setOnCameraChangeListener(new OnCameraChangeListener() {
 		
 		@Override
 		public void onCameraChange(CameraPosition arg0) {
-			LatLng latlong = arg0.target;
-			double c = latlong.latitude;
+			
 		}
 	});
       
@@ -102,8 +128,6 @@ public class TrashMapActivity extends AbstractMapActivity implements
           map.animateCamera(zoom);
         }
 
-      addMarker(map, latLong.getLatitude(), latLong.getLongitude(),
-                "Bounty - 40", "23, Flowers road, kilpauk, chennai - 10");
 //      addMarker(map, 40.76866299974387, -73.98268461227417,
 //                R.string.lincoln_center,
 //                R.string.lincoln_center_snippet);
@@ -115,8 +139,74 @@ public class TrashMapActivity extends AbstractMapActivity implements
       map.setInfoWindowAdapter(new PopupAdapter(getLayoutInflater()));
       map.setOnInfoWindowClickListener(this);
     }
+    
+    
   }
 
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getSupportMenuInflater().inflate(R.menu.trash_map, menu);
+
+    return(super.onCreateOptionsMenu(menu));
+  }
+  
+  @Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		RequestQueue volley = Volley.newRequestQueue(this);
+	    Request<JSONArray> request = new JsonArrayRequest("http://172.16.27.79/trash_can/trash/list",new Listener<JSONArray>() {
+
+			@Override
+			public void onResponse(JSONArray response) {
+				// TODO Auto-generated method stub
+				int count = response.length();
+				for (int i = 0; i < count; i++) {
+					try {
+					JSONObject obj = response.getJSONObject(i);
+					double lat = obj.getDouble("latitude");
+					double lon = obj.getDouble("longitude");
+					String title = obj.getString("base_bounty");
+					String message = obj.getString("message");
+					
+					addMarker(map, lat, lon,
+			                "Bounty - "+title, message);
+					}catch(JSONException e) {
+						Log.e(TAG , e.toString());
+						Toast.makeText(TrashMapActivity.this, "Server unavailable", Toast.LENGTH_LONG).show();
+					}
+				}
+				
+				
+			}
+		}, new ErrorListener() {
+
+		
+
+			@Override
+			public void onErrorResponse(VolleyError error) {
+				// TODO Auto-generated method stub
+				Log.e(TAG , error.toString());
+				Toast.makeText(TrashMapActivity.this, "Not able to connect", Toast.LENGTH_LONG).show();
+			}
+		});
+	    
+	    
+	    volley.add(request);
+	    volley.start();
+	}
+
+  @Override
+  public boolean onOptionsItemSelected(MenuItem item) {
+    if (item.getItemId() == R.id.action_add) {
+      
+
+      return(true);
+    }
+
+    return super.onOptionsItemSelected(item);
+  }
+  
   @Override
   public boolean onNavigationItemSelected(int itemPosition, long itemId) {
     map.setMapType(MAP_TYPES[itemPosition]);
