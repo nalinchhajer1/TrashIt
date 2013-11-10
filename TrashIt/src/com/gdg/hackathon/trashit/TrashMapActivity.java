@@ -20,12 +20,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.actionbarsherlock.app.ActionBar;
@@ -65,6 +69,12 @@ public class TrashMapActivity extends AbstractMapActivity implements
       GoogleMap.MAP_TYPE_TERRAIN };
   private GoogleMap map=null;
 
+protected Location currentLatLong;
+
+View detailLayout ;
+ImageView imageView1;
+TextView textView1, textView2;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -79,7 +89,11 @@ public class TrashMapActivity extends AbstractMapActivity implements
 
       map=mapFrag.getMap();
 
-      
+      detailLayout = findViewById(R.id.detailLayout);
+      imageView1 = (ImageView) findViewById(R.id.imageView1);
+      textView1 = (TextView) findViewById(R.id.textView1);
+      textView2 = (TextView) findViewById(R.id.textView2);
+      detailLayout.setVisibility(View.GONE);
       
       map.setMyLocationEnabled(true);
       
@@ -95,7 +109,7 @@ public class TrashMapActivity extends AbstractMapActivity implements
 		@Override
 		public void onMyLocationChange(Location arg0) {
 			if(arg0!=null) {
-				
+				currentLatLong = arg0;
 			}
 			
 		}
@@ -114,7 +128,7 @@ public class TrashMapActivity extends AbstractMapActivity implements
 		
 		@Override
 		public void onCameraChange(CameraPosition arg0) {
-			
+			detailLayout.setVisibility(View.GONE);
 		}
 	});
       
@@ -122,7 +136,7 @@ public class TrashMapActivity extends AbstractMapActivity implements
           CameraUpdate center=
               CameraUpdateFactory.newLatLng(new LatLng(latLong.getLatitude(),
               		latLong.getLongitude()));
-          CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
+          CameraUpdate zoom=CameraUpdateFactory.zoomTo(14);
 
           map.moveCamera(center);
           map.animateCamera(zoom);
@@ -155,7 +169,9 @@ public class TrashMapActivity extends AbstractMapActivity implements
 		// TODO Auto-generated method stub
 		super.onResume();
 		RequestQueue volley = Volley.newRequestQueue(this);
-	    Request<JSONArray> request = new JsonArrayRequest("http://172.16.27.79/trash_can/trash/list",new Listener<JSONArray>() {
+	    Request<JSONArray> request = new JsonArrayRequest("http://172.16.50.13/trash_can/trash/list",new Listener<JSONArray>() {
+
+			
 
 			@Override
 			public void onResponse(JSONArray response) {
@@ -169,8 +185,8 @@ public class TrashMapActivity extends AbstractMapActivity implements
 					String title = obj.getString("base_bounty");
 					String message = obj.getString("message");
 					
-					addMarker(map, lat, lon,
-			                "Bounty - "+title, message);
+					addMarker(map, lat, lon,message,
+			                "Bounty - "+title);
 					}catch(JSONException e) {
 						Log.e(TAG , e.toString());
 						Toast.makeText(TrashMapActivity.this, "Server unavailable", Toast.LENGTH_LONG).show();
@@ -186,8 +202,11 @@ public class TrashMapActivity extends AbstractMapActivity implements
 			@Override
 			public void onErrorResponse(VolleyError error) {
 				// TODO Auto-generated method stub
+				addMarker(map, 13.0930851, 80.2618934, "4 trees", "Bounty - 2000");
+				addMarker(map, 13.08007438, 80.26236556, "Old Junkies", "Bounty - 50");
+				addMarker(map, 13.095599500, 80.27806386, "This area looks messed up", "Bounty - 300");
 				Log.e(TAG , error.toString());
-				Toast.makeText(TrashMapActivity.this, "Not able to connect", Toast.LENGTH_LONG).show();
+				Toast.makeText(TrashMapActivity.this, "Not able to connect - Populating with dummy data", Toast.LENGTH_LONG).show();
 			}
 		});
 	    
@@ -199,13 +218,33 @@ public class TrashMapActivity extends AbstractMapActivity implements
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == R.id.action_add) {
-      
+    	Intent intent = new Intent("android.media.action.IMAGE_CAPTURE");
+		startActivityForResult(intent, 1003);
 
       return(true);
     }
 
     return super.onOptionsItemSelected(item);
   }
+  
+  @Override
+protected void onActivityResult(int arg0, int arg1, Intent arg2) {
+	// TODO Auto-generated method stub
+	super.onActivityResult(arg0, arg1, arg2);
+	Toast.makeText(this, "Thanks for tagging, image uploaded.", Toast.LENGTH_LONG).show();
+	
+	if(currentLatLong!=null) {
+		addMarker(map, currentLatLong.getLatitude(), currentLatLong.getLongitude(),"New trash discovered",
+                "Bounty - 50");
+		CameraUpdate center=
+	              CameraUpdateFactory.newLatLng(new LatLng(currentLatLong.getLatitude(),
+	            		  currentLatLong.getLongitude()));
+	          CameraUpdate zoom=CameraUpdateFactory.zoomTo(15);
+
+	          map.moveCamera(center);
+	          map.animateCamera(zoom);
+	}
+}
   
   @Override
   public boolean onNavigationItemSelected(int itemPosition, long itemId) {
@@ -231,7 +270,11 @@ public class TrashMapActivity extends AbstractMapActivity implements
 
   @Override
   public void onInfoWindowClick(Marker marker) {
-    Toast.makeText(this, marker.getTitle(), Toast.LENGTH_LONG).show();
+	  
+	  detailLayout.setVisibility(View.VISIBLE);
+	  
+	  textView1.setText(marker.getTitle());
+	  textView2.setText(marker.getSnippet());
   }
 
   private void initListNav() {
